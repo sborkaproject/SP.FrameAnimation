@@ -1,0 +1,293 @@
+FrameAnimation — это часть нашего фреймворка для работы с покадровыми анимациями.
+
+Сам класс FrameAnimation не занимается отображением и является абстрактным ядром библиотеки,
+которая при подключении на странице один раз "цепляется" к обновлению браузера (window.requestAnimationFrame или фолбэк до setTimeout)
+и автоматически обновляет все экземпляры своих классов-наследников (модулей). При недостаточной скорости обновления
+браузера, FrameAnimation виртуально (без рендеринга кадров) обрабатывает пропущеныые кадры анимаций
+и их колбэки, сохраняя скорость анимаций и стараясь не зависить от частоты обновления.
+
+Таким образом, FrameAnimation централизовано контролирует все анимации на странице, учитывая время
+между событиями обновления и стараясь сохранять необходимую скорость анимаций даже с пропуском кадров.
+
+Все методы класса FrameAnimation можно поделить на три категории: основные, вспомогательные
+и методы для разработчиков. В подавляющем большинстве случаев достаточно использовать основные методы.
+Вспомогательные методы и методы для разработчиков будут полезны тем, кто способен самостоятельно написать аналогичную библиотеку :)
+
+Методы, помеченные [testing] на данный момент находятся на этапе тестирования.
+Методы, помеченные [todo] на данный момент находятся на этапе разработки.
+Методы, помеченные [featured] планируются к введению в будущем.
+
+
+Основные методы FrameAnimation:
+
+    FrameAnimation.stop():FrameAnimation
+        - Выключает работу FrameAnimation.
+
+    FrameAnimation.start():FrameAnimation
+        - Включает FrameAnimation, если было выключено.
+
+    FrameAnimation.fps():Number
+        - Возвращает текущий фпс проигрывания.
+
+    FrameAnimation.timeScale([value]):Number|FrameAnimation
+        - Возвращает глобальный масштаб внемени или устанавливает его, если указан параметр.
+
+    FrameAnimation.addUpdateCallback(callback):FrameAnimation
+        - Добавляет колбэк на событие обновления FrameAnimation.
+
+    FrameAnimation.removeUpdateCallback(callback):FrameAnimation
+        - Удаляет добавленный колбэк на событие обновления FrameAnimation.
+
+
+Вспомогательные методы FrameAnimation:
+
+    FrameAnimation.utils.log(msg)
+        - Вывод в консоль сообщения.
+
+    FrameAnimation.utils.error(msg)
+        - Создание ошибки выполнения скрипта.
+
+    FrameAnimation.utils.isArray(testArray):Boolean
+        - Определяет, является ли передаваемый объект массивом.
+
+    FrameAnimation.utils.isIE():Boolean
+        - Возвращает true, если браузер семейства Internet Explorer.
+
+    FrameAnimation.utils.isElement(obj):Boolean
+        - Определяет, является ли передаваемый объект DOM-элементом.
+
+    FrameAnimation.utils.getDOMElement(query):DOMElement
+        - Вернет ссылку на DOM-элемент, попадающий под условие выборки query.
+
+    FrameAnimation.utils.getCSSValue([value]):String
+        - Вернет передаваемый параметр или, при отсутствии уточнения единиц изменения в параметре,
+        вернет значение с постфиксом "px" или "0" при отсутствии параметра.
+
+    FrameAnimation.utils.rightNow():Number
+        - Возвращает текущее время в мс.
+
+
+Методы FrameAnimation для разработчиков:
+
+    FrameAnimation.extend(from[, module]):Function
+        - Возвращает передаваемую функцию module (или новую функцию, если module не указана), прототип которой наследован от объекта from.
+
+    FrameAnimation.maxFrameRepeats([value]):Number|FrameAnimation
+        - Возвращает лимит количества обработок пропущенных кадров или устанавливает его.
+
+    FrameAnimation.maxFrameDelta([value]):Number|FrameAnimation
+        - (описание отсутствует) 
+
+    FrameAnimation.maxDelta([value]):Number|FrameAnimation
+        - (описание отсутствует)
+
+    FrameAnimation.useExtraFrames([value]):Boolean|FrameAnimation
+        - Возвращает флаг использования обработки пропущенных кадров или устанавливает его.
+
+
+Непосредственно для создания анимаций на странице можно использовать следующие классы:
+CanvasFrameAnimation, ImageFrameAnimation и SpriteFrameAnimation.
+
+Так как все они являются наследниками FrameAnimation, у них есть следующие идентичные
+по действию методы:
+
+Методы для контроля воспроизведения:
+
+    CanvasFrameAnimation.play([direction]):CanvasFrameAnimation
+    ImageFrameAnimation.play([direction]):ImageFrameAnimation
+    SpriteFrameAnimation.play([direction]):SpriteFrameAnimation
+        - Начинает воспроизведение анимации и возвращает ссылку на экземпляр класса.
+        Опциональный параметр direction - это число, знак которого определяет направление воспроизведения.
+        При положительном значении direction анимация будет проигрываться от первого кадра до последнего,
+        при отрицательном, - от последнего кадра до первого.
+
+    CanvasFrameAnimation.stop():CanvasFrameAnimation
+    ImageFrameAnimation.stop():ImageFrameAnimation
+    SpriteFrameAnimation.stop():SpriteFrameAnimation    
+        - Останавливает воспроизведение.
+
+    CanvasFrameAnimation.playing():Boolean
+    ImageFrameAnimation.playing():Boolean
+    SpriteFrameAnimation.playing():Boolean    
+        - Возвращает true, если анимация воспроизводится.
+
+    CanvasFrameAnimation.toggle():CanvasFrameAnimation
+    ImageFrameAnimation.toggle():ImageFrameAnimation
+    SpriteFrameAnimation.toggle():SpriteFrameAnimation    
+        - При остановленной анимации включает ее, иначе останавливает. Возвращает экземпляр класса.
+
+    [testing]
+    CanvasFrameAnimation.direction([value]):Number|CanvasFrameAnimation
+    ImageFrameAnimation.direction([value]):Number|ImageFrameAnimation
+    SpriteFrameAnimation.direction([value]):Number|SpriteFrameAnimation    
+        - Возвращает направление воспроизведения или определяет его и возвращает экземпляр класса. value - числовой параметр, 
+        при его положительном значении анимация будет проигрываться от первого кадра до последнего,
+        при отрицательном, - от последнего кадра до первого.
+
+    [testing]
+    CanvasFrameAnimation.flip():CanvasFrameAnimation
+    ImageFrameAnimation.flip():ImageFrameAnimation
+    SpriteFrameAnimation.flip():SpriteFrameAnimation    
+        - Инвертирует направление воспроизведения анимации и возвращает ссылку на экземпляр класса.
+
+    CanvasFrameAnimation.gotoAndPlay(frame[, direction]):CanvasFrameAnimation
+    ImageFrameAnimation.gotoAndPlay(frame[, direction]):ImageFrameAnimation
+    SpriteFrameAnimation.gotoAndPlay(frame[, direction]):SpriteFrameAnimation    
+        - Переводит анимацию на указанный кадр и начинает/продолжает воспроизведение.
+        Параметр frame попадает в диапазон значений от 1 до количества кадров.
+
+    CanvasFrameAnimation.gotoAndStop(frame):CanvasFrameAnimation
+    ImageFrameAnimation.gotoAndStop(frame):ImageFrameAnimation
+    SpriteFrameAnimation.gotoAndStop(frame):SpriteFrameAnimation    
+        - Переводит анимацию на указанный кадр и останавливает воспроизведение.
+        Параметр frame попадает в диапазон значений от 1 до количества кадров.
+        
+    CanvasFrameAnimation.totalFrames():Number
+    ImageFrameAnimation.totalFrames():Number
+    SpriteFrameAnimation.totalFrames():Number    
+        - Возвращает кол-во кадров анимации.
+
+    CanvasFrameAnimation.currentFrame():Number
+    ImageFrameAnimation.currentFrame():Number
+    SpriteFrameAnimation.currentFrame():Number    
+        - Возвращает целое значение текущего кадра анимации.
+
+    [featured]
+    CanvasFrameAnimation.currentRealFrame():Number
+    ImageFrameAnimation.currentRealFrame():Number
+    SpriteFrameAnimation.currentRealFrame():Number  
+        - Возвращает значение текущего кадра (может быть не целым)
+
+Методы для работы с колбэками и событиями кадров:
+
+    CanvasFrameAnimation.addStopFrame(frame):CanvasFrameAnimation
+    ImageFrameAnimation.addStopFrame(frame):ImageFrameAnimation
+    SpriteFrameAnimation.addStopFrame(frame):SpriteFrameAnimation
+        - Устанавливает указанный номер кадра в качестве стоп-кадра.
+
+    CanvasFrameAnimation.removeStopFrame(frame):CanvasFrameAnimation
+    ImageFrameAnimation.removeStopFrame(frame):ImageFrameAnimation
+    SpriteFrameAnimation.removeStopFrame(frame):SpriteFrameAnimation
+        - Удаляет номер кадра из списка стоп-кадров.
+
+    CanvasFrameAnimation.removeStopFrames(frames):CanvasFrameAnimation
+    ImageFrameAnimation.removeStopFrames(frames):ImageFrameAnimation
+    SpriteFrameAnimation.removeStopFrames(frames):SpriteFrameAnimation
+        - Удаляет указанные в массиве frames стоп-кадры анимации.
+
+    CanvasFrameAnimation.removeAllStopFrames():CanvasFrameAnimation
+    ImageFrameAnimation.removeAllStopFrames():ImageFrameAnimation
+    SpriteFrameAnimation.removeAllStopFrames():SpriteFrameAnimation
+        - Удаляет все стоп-кадры анимации.
+
+    CanvasFrameAnimation.setStopFrames(frames):CanvasFrameAnimation
+    ImageFrameAnimation.setStopFrames(frames):ImageFrameAnimation
+    SpriteFrameAnimation.setStopFrames(frames):SpriteFrameAnimation
+        - Устанавливает стоп-кадры анимации в соответствии с передаваемым массивом.
+
+    CanvasFrameAnimation.getStopFrames():Array
+    ImageFrameAnimation.getStopFrames():Array
+    SpriteFrameAnimation.getStopFrames():Array
+        - Возвращает копию массива стоп-кадров анимации.
+
+    CanvasFrameAnimation.addFrameCallback(frame, callback[, repeats]):CanvasFrameAnimation
+    ImageFrameAnimation.addFrameCallback(frame, callback[, repeats]):ImageFrameAnimation
+    SpriteFrameAnimation.addFrameCallback(frame, callback[, repeats]):SpriteFrameAnimation
+        - Добавляет колбэк на кадр. Опционально устанавливает счетчик выполнения колбэка, по истечению которого, колбэк удалается.
+
+    CanvasFrameAnimation.addFramesCallback(frames, callback[, repeats]):CanvasFrameAnimation
+    ImageFrameAnimation.addFramesCallback(frames, callback[, repeats]):ImageFrameAnimation
+    SpriteFrameAnimation.addFramesCallback(frames, callback[, repeats]):SpriteFrameAnimation
+        - Добавляет колбэки на кадры в соответствии со значениями в массиве frames.
+        Опционально устанавливает счетчик выполнения колбэка, по истечению которого, колбэк удалается.
+
+    CanvasFrameAnimation.removeFrameCallback(frame, callback):CanvasFrameAnimation
+    ImageFrameAnimation.removeFrameCallback(frame, callback):ImageFrameAnimation
+    SpriteFrameAnimation.removeFrameCallback(frame, callback):SpriteFrameAnimation
+        - Удаляет колбэк кадра.
+
+    CanvasFrameAnimation.removeFrameCallbacks(frame):CanvasFrameAnimation
+    ImageFrameAnimation.removeFrameCallbacks(frame):ImageFrameAnimation
+    SpriteFrameAnimation.removeFrameCallbacks(frame):SpriteFrameAnimation
+        - Удаляет все колбэки кадра.
+
+    CanvasFrameAnimation.removeAllFrameCallbacks():CanvasFrameAnimation
+    ImageFrameAnimation.removeAllFrameCallbacks():ImageFrameAnimation
+    SpriteFrameAnimation.removeAllFrameCallbacks():SpriteFrameAnimation
+        - Удаляет все колбэки анимации.
+
+
+Методы для работы со скоростью воспроизведения анимации:
+
+    [testing]
+    CanvasFrameAnimation.useUpdateSpeed([state]):CanvasFrameAnimation
+    ImageFrameAnimation.useUpdateSpeed([state]):ImageFrameAnimation
+    SpriteFrameAnimation.useUpdateSpeed([state]):SpriteFrameAnimation
+        - Возвращает флаг использования скорости обновления браузера или устанавливает его.
+        При установленном флаге анимация будет игнорировать ее фпс и игнорировать
+        timeScale у FrameAnimation.
+
+    [testing]
+    CanvasFrameAnimation.alwaysRender([state]):CanvasFrameAnimation
+    ImageFrameAnimation.alwaysRender([state]):ImageFrameAnimation
+    SpriteFrameAnimation.alwaysRender([state]):SpriteFrameAnimation
+        - Возвращает флаг необходимости постоянного рендеринга анимаии или устанавливает его.
+        При установленном флаге анимация будет рендериться при каждом обновлении браузера,
+        вне зависимости от того, на каком она кадре.
+
+    CanvasFrameAnimation.fps([value]):Number|CanvasFrameAnimation
+    ImageFrameAnimation.fps([value]):Number|ImageFrameAnimation
+    SpriteFrameAnimation.fps([value]):Number|SpriteFrameAnimation
+        - Возвращает фпс анимации или устанавливает его.
+
+    [featured]
+    CanvasFrameAnimation.frameTime(frame, [value]):Number|CanvasFrameAnimation
+    ImageFrameAnimation.frameTime(frame, [value]):Number|ImageFrameAnimation
+    SpriteFrameAnimation.frameTime(frame, [value]):Number|SpriteFrameAnimation
+        - Устанавиливает продолжительность кадра или возвращает значение.
+
+
+Остальные методы:
+
+    [todo]
+    CanvasFrameAnimation.die()
+    ImageFrameAnimation.die()
+    SpriteFrameAnimation.die()
+        - Исключает экземпляр класса из списка обновления анимаций.
+
+
+    CanvasFrameAnimation.available():Boolean (метод доступен как у класса, так и у экземпляра класса)
+    ImageFrameAnimation.available():Boolean (метод доступен как у класса, так и у экземпляра класса)
+    SpriteFrameAnimation.available():Boolean (метод доступен как у класса, так и у экземпляра класса)
+        - возвращает флаг возможности работы данного класса в текущем браузере.
+
+    [testing]
+    CanvasFrameAnimation.debug([state, appendTo]):Boolean|CanvasFrameAnimation
+    ImageFrameAnimation.debug([state, appendTo]):Boolean|ImageFrameAnimation
+    SpriteFrameAnimation.debug([state, appendTo]):Boolean|SpriteFrameAnimation
+        - Возвращает флаг режима отладки или устанавливает его. При указанном appendTo (являющимся ссылкой на DOM-элемент) добавляет отладочный DOM-элемент в элемент appendTo.
+        Иначе добавляет отладочный элемент в основной элемент рендеринга.
+
+    CanvasFrameAnimation.getDebugElement():DomElement
+    ImageFrameAnimation.getDebugElement():DomElement
+    SpriteFrameAnimation.getDebugElement():DomElement
+        - Возвращает ссылку на отладочный DOM-элемент и включает отладочный режим.
+
+    CanvasFrameAnimation.force3D([state]):Boolean|CanvasFrameAnimation
+    ImageFrameAnimation.force3D([state]):Boolean|ImageFrameAnimation
+    SpriteFrameAnimation.force3D([state]):Boolean|SpriteFrameAnimation
+        - Возвращает флаг форсирования браузера для рендеринга DOM-элемента анимации в отдельном слое или устанавливает его.
+        Использует css-свойства transform, backface-visibility и perspective.
+
+
+Описания и особенности модулей, их частные методы.
+
+CanvasFrameAnimation - модуль для рендеринга последовательности изображений с помощью элемента canvas.
+{написать описание}
+
+ImageFrameAnimation - модуль для рендеринга последовательности изображений с помощью создания соответствующего списка элементов img
+в контейнере для анимации и переключения состояния видимости необходимого элемента img.
+{написать описание}
+
+SpriteFrameAnimation - модуль для рендеринга анимации из спрайта, - одного изображения, составленного из кадров анимации.
+{написать описание}
